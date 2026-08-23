@@ -23,4 +23,10 @@
     <ProjectReference Include="..\..\src\McpSecurityScanner.Infrastructure\McpSecurityScanner.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Fixtures\McpDetection\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
