@@ -28,6 +28,8 @@ See [MCP-1 Foundation & Security Contract](docs/architecture/mcp-1-foundation-se
 
 It returns the parsed owner/repository for a canonical URL or a safe `400 INVALID_REPOSITORY_URL` response for unsupported input. The endpoint does not make a GitHub request, so a syntactically accepted URL is not evidence that its repository exists or is public; that check belongs to the next ingestion ticket.
 
+`POST /api/scans` accepts the same request shape and performs the complete bounded flow: validation, public GitHub metadata/tree/content read, MCP detection, and all seven MVP rules. A successful response returns the repository, MCP classification/evidence, and a severity summary plus findings. No scan history, account, database, repository clone, or code execution is involved. Errors use the safe API error model and findings redact credential evidence.
+
 ## Safe ingestion boundary
 
 The ingestion service uses a fixed `https://api.github.com/` REST base address with redirects disabled. It reads metadata, a recursive tree, and selected Base64 file content only; it never clones, checks out, builds, installs, or runs repository code.
