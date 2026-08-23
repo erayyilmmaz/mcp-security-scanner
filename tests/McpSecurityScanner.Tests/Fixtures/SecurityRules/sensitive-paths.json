@@ -1,0 +1,6 @@
+{
+  "privateKey": "~/.ssh/id_ed25519",
+  "credentials": "$HOME/.aws/credentials",
+  "hostConfig": "/etc/ssh/ssh_config",
+  "dockerSocket": "/var/run/docker.sock"
+}
