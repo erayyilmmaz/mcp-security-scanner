@@ -6,7 +6,7 @@ The scanner reads and analyzes repository content; it **never executes analyzed 
 
 ## Project status
 
-MCP-1 security contract, MCP-2 canonical GitHub URL validation, MCP-3 safe public-repository ingestion, MCP-4 deterministic MCP detection, and MCP-5 rule-engine/finding contracts are implemented. Concrete security rules have not started yet.
+MCP-1 security contract, MCP-2 canonical GitHub URL validation, MCP-3 safe public-repository ingestion, MCP-4 deterministic MCP detection, MCP-5 rule-engine/finding contracts, and MCP-6 local-execution/filesystem rules are implemented.
 
 ## Architecture and security contract
 
@@ -41,3 +41,7 @@ The detector classifies bounded repository content as `mcp_related`, `not_mcp`, 
 ## Rule engine
 
 The rule engine runs independently implemented deterministic rules against the bounded content set. It produces versioned, severity-sorted findings with file/location evidence, explanation, remediation, confidence, and reference metadata. Evidence is redacted before it can enter a report. See [MCP-5 rule engine contract](docs/architecture/mcp-5-rule-engine-contract.md).
+
+## Local-execution and filesystem rules
+
+MCP-6 implements `MCP-CMD-001` for `sudo`, `MCP-CMD-002` for explicit `rm -rf`/`curl|sh`/`wget|sh` forms, and `MCP-FS-001` for SSH, cloud-credential, system, and container-control paths. They scan supported configuration and executable source formats only; README prose is not treated as a high-severity finding. See [MCP-6 rule contract](docs/architecture/mcp-6-local-execution-filesystem-rules.md).
