@@ -69,9 +69,11 @@ The URL must use HTTPS, host `github.com`, and contain exactly an owner and repo
 
 - Any non-HTTPS scheme, alternate host, IP address, localhost address, port, user-info component, query string, or fragment.
 - SSH/`git@github.com:` forms, `.git` suffixes, branch/tree/blob paths, and arbitrary remote URLs.
-- Empty, malformed, or overlong input.
+- Empty, malformed, or input longer than 2,048 characters.
 
 The submitted URL is an identifier only. It must be parsed into owner/repository values; downstream access uses an allowlisted GitHub API base URL.
+
+MCP-2 performs only syntactic URL validation. Repository existence and public accessibility are verified later by the read-only GitHub ingestion flow; a syntactically valid URL must not be represented as an accessible repository before that check.
 
 ## 5. Initial resource policy
 

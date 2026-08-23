@@ -6,7 +6,7 @@ The scanner reads and analyzes repository content; it **never executes analyzed 
 
 ## Project status
 
-MVP foundation contract is defined. Implementation begins with safe public GitHub URL validation and read-only repository ingestion.
+MCP-1 security contract and MCP-2 canonical GitHub URL validation are implemented. Repository ingestion has not started yet.
 
 ## Architecture and security contract
 
@@ -17,3 +17,13 @@ See [MCP-1 Foundation & Security Contract](docs/architecture/mcp-1-foundation-se
 - Public canonical GitHub repository URLs only.
 - Deterministic static checks with evidence, remediation, confidence, and references.
 - No repository code execution, database, accounts, private repositories, LLM analysis, or dynamic testing.
+
+## Current API surface
+
+`POST /api/repositories/validate` accepts only this request shape:
+
+```json
+{ "repositoryUrl": "https://github.com/owner/repository" }
+```
+
+It returns the parsed owner/repository for a canonical URL or a safe `400 INVALID_REPOSITORY_URL` response for unsupported input. The endpoint does not make a GitHub request, so a syntactically accepted URL is not evidence that its repository exists or is public; that check belongs to the next ingestion ticket.
