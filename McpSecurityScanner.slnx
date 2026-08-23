@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/McpSecurityScanner.Api/McpSecurityScanner.Api.csproj" />
+    <Project Path="src/McpSecurityScanner.Core/McpSecurityScanner.Core.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/McpSecurityScanner.Tests/McpSecurityScanner.Tests.csproj" />
+  </Folder>
+</Solution>
