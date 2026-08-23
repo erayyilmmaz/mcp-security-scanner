@@ -1,0 +1,47 @@
+name: Build and test
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Build, test, coverage, and container
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v6
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Set up Node.js for UI flow tests
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24.x
+
+      - name: Restore .NET dependencies
+        run: dotnet restore McpSecurityScanner.slnx
+
+      - name: Run .NET tests with coverage
+        run: dotnet test McpSecurityScanner.slnx --configuration Release --no-restore --collect:'XPlat Code Coverage' --results-directory TestResults
+
+      - name: Enforce line coverage target
+        run: node scripts/check-coverage.mjs TestResults 0.75
+
+      - name: Run UI flow tests
+        run: npm run test:ui
+
+      - name: Build release artifacts
+        run: dotnet build McpSecurityScanner.slnx --configuration Release --no-restore
+
+      - name: Build container image
+        run: docker build --tag mcp-security-scanner:ci .

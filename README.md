@@ -1,57 +1,164 @@
 # MCP Security Scanner
 
-An explainable, deterministic, specification-backed security scanner for public GitHub repositories containing Model Context Protocol (MCP) servers or configuration.
+An explainable, deterministic static scanner for public GitHub repositories that contain Model Context Protocol (MCP) configuration or servers.
 
-The scanner reads and analyzes repository content; it **never executes analyzed repository code**.
+> This is not a security certification, a comprehensive pentest, a runtime sandbox, or proof that a repository is safe. It reports bounded static evidence from the currently implemented rules.
 
-## Project status
+## What it does
 
-MCP-1 security contract, MCP-2 canonical GitHub URL validation, MCP-3 safe public-repository ingestion, MCP-4 deterministic MCP detection, MCP-5 rule-engine/finding contracts, MCP-6 local-execution/filesystem rules, and MCP-7 transport/credential/authorization rules are implemented.
+1. Accepts exactly one canonical public URL: `https://github.com/{owner}/{repository}`.
+2. Reads bounded public GitHub metadata, tree entries, and eligible text files using GitHub's REST API.
+3. Classifies the repository as `mcp_related`, `not_mcp`, or `inconclusive` and returns explicit detection evidence.
+4. Runs deterministic security rules and returns severity counts plus redacted, location-specific findings.
 
-## Architecture and security contract
+The browser UI is available at `/`; the API endpoint is `POST /api/scans`.
 
-See [MCP-1 Foundation & Security Contract](docs/architecture/mcp-1-foundation-security-contract.md) for the threat model, processing limits, API/error contract, and rule/report model.
+## Non-negotiable safety boundary
 
-## MVP boundaries
+MSS **never executes analyzed repository code**. It does not clone, check out, build, install dependencies for, start, shell into, run Docker for, or dynamically test the submitted repository. The scanner uses a fixed `https://api.github.com/` client with redirects disabled and never derives arbitrary request destinations from submitted input.
 
-- Public canonical GitHub repository URLs only.
-- Deterministic static checks with evidence, remediation, confidence, and references.
-- No repository code execution, database, accounts, private repositories, LLM analysis, or dynamic testing.
+## Architecture
 
-## Current API surface
-
-`POST /api/repositories/validate` accepts only this request shape:
-
-```json
-{ "repositoryUrl": "https://github.com/owner/repository" }
+```text
+Browser UI / API client
+          |
+          v
+POST /api/scans
+          |
+          v
+Canonical URL validation
+          |
+          v
+Fixed-host GitHub metadata/tree/content reader
+          |
+          +--> MCP detector --> classification + evidence
+          |
+          +--> deterministic rule engine --> redacted findings + summary
+          |
+          v
+In-memory JSON response (no account, database, or scan history)
 ```
 
-It returns the parsed owner/repository for a canonical URL or a safe `400 INVALID_REPOSITORY_URL` response for unsupported input. The endpoint does not make a GitHub request, so a syntactically accepted URL is not evidence that its repository exists or is public; that check belongs to the next ingestion ticket.
+The Core scan orchestration calls only the bounded ingestion service, MCP detector, and static rule engine. API output is derived from typed safe contracts; error messages exclude GitHub response bodies and rule evidence passes through secret redaction before serialization.
 
-`POST /api/scans` accepts the same request shape and performs the complete bounded flow: validation, public GitHub metadata/tree/content read, MCP detection, and all seven MVP rules. A successful response returns the repository, MCP classification/evidence, and a severity summary plus findings. No scan history, account, database, repository clone, or code execution is involved. Errors use the safe API error model and findings redact credential evidence.
+## Threat model and limits
 
-## Minimal web interface
+The principal scanner risks are SSRF, arbitrary code execution, resource exhaustion, parser abuse, and accidental secret disclosure. The MVP mitigates them with a canonical URL gate, fixed GitHub API base address, redirect denial, read-only Base64 content fetches, strict UTF-8/binary handling, resource caps, controlled errors, and evidence redaction.
 
-The root route serves a dependency-free scan UI. It validates canonical GitHub URLs before submitting, shows loading and safe error states, and renders MCP evidence plus each finding's location, redacted evidence, impact, remediation, confidence, and reference. It intentionally presents static evidence only—never a security score or certification claim.
+| Bound | MVP value |
+|---|---:|
+| Tree entries | 1,000 |
+| Candidate files | 200 |
+| Single file | 512 KiB |
+| Total decoded input | 5 MiB |
+| Analysis deadline | 20 seconds |
 
-## Safe ingestion boundary
-
-The ingestion service uses a fixed `https://api.github.com/` REST base address with redirects disabled. It reads metadata, a recursive tree, and selected Base64 file content only; it never clones, checks out, builds, installs, or runs repository code.
-
-The initial limits are 1,000 tree entries, 200 candidate files, 512 KiB per file, 5 MiB total source bytes, and a 20-second deadline. Binary files and symbolic links are skipped; limit and timeout failures return controlled error contracts without logging raw repository content.
+Binary files and symbolic links are skipped. Private, deleted, unavailable, rate-limited, oversized, or timed-out repositories return safe error responses rather than partial execution or raw upstream content.
 
 ## MCP detection
 
-The detector classifies bounded repository content as `mcp_related`, `not_mcp`, or `inconclusive`. Positive classifications require deterministic evidence from an MCP configuration structure, SDK dependency, or server declaration; `not_mcp` is never presented as a security certification or “clean” result. See [MCP-4 detection signals](docs/architecture/mcp-4-detection-signals.md).
+Positive MCP classification requires deterministic evidence from at least one implemented source:
 
-## Rule engine
+- JSON `mcpServers` configuration structure (`MCP-CONFIG-001`)
+- MCP SDK dependency in a supported manifest (`MCP-SDK-001`)
+- Supported source-level MCP server declaration (`MCP-SERVER-001`)
 
-The rule engine runs independently implemented deterministic rules against the bounded content set. It produces versioned, severity-sorted findings with file/location evidence, explanation, remediation, confidence, and reference metadata. Evidence is redacted before it can enter a report. See [MCP-5 rule engine contract](docs/architecture/mcp-5-rule-engine-contract.md).
+`not_mcp` only means no implemented signal was found in processable text. It is never a “clean” or certified security result.
 
-## Local-execution and filesystem rules
+## Rule catalogue
 
-MCP-6 implements `MCP-CMD-001` for `sudo`, `MCP-CMD-002` for explicit `rm -rf`/`curl|sh`/`wget|sh` forms, and `MCP-FS-001` for SSH, cloud-credential, system, and container-control paths. They scan supported configuration and executable source formats only; README prose is not treated as a high-severity finding. See [MCP-6 rule contract](docs/architecture/mcp-6-local-execution-filesystem-rules.md).
+| Rule ID | Severity | Static evidence |
+|---|---:|---|
+| `MCP-CMD-001` | High | `sudo` privileged execution token |
+| `MCP-CMD-002` | High | `rm` with recursive+force flags; `curl`/`wget` pipe-to-shell |
+| `MCP-FS-001` | Medium | SSH/AWS credentials, system, process-environment, or Docker control paths |
+| `MCP-NET-001` | Medium | Non-loopback remote `http://` endpoint |
+| `MCP-SEC-001` | High | Literal hardcoded credential assignment |
+| `MCP-AUTH-001` | Medium | Explicit broad or wildcard OAuth scope |
+| `MCP-AUTH-002` | High | `javascript:`, `file:`, or `data:` authorization/redirect URL |
 
-## Transport, credential, and authorization rules
+Credential-like evidence is masked as `[REDACTED]`. Loopback, `localhost`, `*.localhost`, and `0.0.0.0` development bind addresses are not reported by `MCP-NET-001`. Rule findings are static indicators, not exploitability claims.
 
-MCP-7 implements `MCP-NET-001` for non-loopback `http://` endpoints, `MCP-SEC-001` for literal hardcoded credentials, `MCP-AUTH-001` for explicit broad/wildcard OAuth scopes, and `MCP-AUTH-002` for `javascript:`, `file:`, and `data:` authorization URL schemes. Localhost, loopback, and `0.0.0.0` development endpoints are excluded. See [MCP-7 rule contract](docs/architecture/mcp-7-transport-credential-authorization-rules.md).
+## Example scan
+
+```bash
+curl --request POST http://127.0.0.1:8080/api/scans \
+  --header 'Content-Type: application/json' \
+  --data '{"repositoryUrl":"https://github.com/owner/repository"}'
+```
+
+Illustrative redacted response shape:
+
+```json
+{
+  "repository": { "owner": "owner", "name": "repository" },
+  "mcp": {
+    "classification": "mcp_related",
+    "evidence": [{ "signalId": "MCP-CONFIG-001", "filePath": "mcp.json", "line": 2 }]
+  },
+  "report": {
+    "ruleSetVersion": "1.0.0",
+    "summary": { "critical": 0, "high": 1, "medium": 1, "low": 0, "informational": 0 },
+    "findings": [{
+      "ruleId": "MCP-SEC-001",
+      "filePath": "mcp.json",
+      "line": 5,
+      "evidence": "\"apiKey\": [REDACTED]",
+      "remediation": "Remove the literal credential and load it from an approved secret manager."
+    }]
+  }
+}
+```
+
+## Run locally
+
+Prerequisites: .NET SDK 10 and Node.js 24 (Node is used only for UI-flow tests).
+
+```bash
+dotnet restore McpSecurityScanner.slnx
+dotnet run --project src/McpSecurityScanner.Api/McpSecurityScanner.Api.csproj --urls http://127.0.0.1:8080
+```
+
+Open `http://127.0.0.1:8080` in a browser. The local server does not persist scan results.
+
+## Test and quality gates
+
+```bash
+# .NET unit, integration, ingestion, detector, and rule-engine tests
+dotnet test McpSecurityScanner.slnx --configuration Release --no-restore
+
+# Browser-state UI flow tests (no third-party frontend packages)
+npm run test:ui
+
+# Cobertura coverage report and MCP-10 line-coverage gate
+dotnet test McpSecurityScanner.slnx --configuration Release --no-restore --collect:'XPlat Code Coverage' --results-directory TestResults
+npm run check:coverage
+
+# Release build
+dotnet build McpSecurityScanner.slnx --configuration Release --no-restore
+```
+
+The initial MVP quality gate is **at least 75% total line coverage**. The measured baseline when this gate was introduced was 78.23%. GitHub Actions runs restore, .NET tests with coverage, the coverage gate, UI tests, release build, and a Docker image build on pushes and pull requests.
+
+## Run with Docker
+
+```bash
+docker build --tag mcp-security-scanner:local .
+docker run --rm --publish 8080:8080 mcp-security-scanner:local
+```
+
+Then open `http://127.0.0.1:8080`. The runtime image exposes port 8080 and runs as the base image's non-root application user.
+
+## Limitations and non-goals
+
+- Public canonical GitHub repositories only; private repositories and arbitrary URLs are rejected.
+- No runtime execution, exploit generation, dynamic testing, LLM analysis, full vulnerability coverage, SBOM, SARIF, or CI-action integration for scanned repositories.
+- No authentication, organization support, billing, database, scan history, or report persistence.
+- Rule coverage is intentionally narrow and deterministic. A missing finding is not proof of absence of risk.
+
+## Further reading
+
+- [MCP-1 security and architecture contract](docs/architecture/mcp-1-foundation-security-contract.md)
+- [MCP-5 rule-engine contract](docs/architecture/mcp-5-rule-engine-contract.md)
+- [MCP-8 scan API contract](docs/architecture/mcp-8-scan-api-contract.md)
+- [MCP-9 web UI contract](docs/architecture/mcp-9-minimal-web-ui-contract.md)
