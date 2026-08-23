@@ -6,7 +6,7 @@ The scanner reads and analyzes repository content; it **never executes analyzed 
 
 ## Project status
 
-MCP-1 security contract, MCP-2 canonical GitHub URL validation, MCP-3 safe public-repository ingestion, and MCP-4 deterministic MCP detection are implemented. Security rules have not started yet.
+MCP-1 security contract, MCP-2 canonical GitHub URL validation, MCP-3 safe public-repository ingestion, MCP-4 deterministic MCP detection, and MCP-5 rule-engine/finding contracts are implemented. Concrete security rules have not started yet.
 
 ## Architecture and security contract
 
@@ -37,3 +37,7 @@ The initial limits are 1,000 tree entries, 200 candidate files, 512 KiB per file
 ## MCP detection
 
 The detector classifies bounded repository content as `mcp_related`, `not_mcp`, or `inconclusive`. Positive classifications require deterministic evidence from an MCP configuration structure, SDK dependency, or server declaration; `not_mcp` is never presented as a security certification or “clean” result. See [MCP-4 detection signals](docs/architecture/mcp-4-detection-signals.md).
+
+## Rule engine
+
+The rule engine runs independently implemented deterministic rules against the bounded content set. It produces versioned, severity-sorted findings with file/location evidence, explanation, remediation, confidence, and reference metadata. Evidence is redacted before it can enter a report. See [MCP-5 rule engine contract](docs/architecture/mcp-5-rule-engine-contract.md).
