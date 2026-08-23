@@ -6,7 +6,7 @@ The scanner reads and analyzes repository content; it **never executes analyzed 
 
 ## Project status
 
-MCP-1 security contract and MCP-2 canonical GitHub URL validation are implemented. Repository ingestion has not started yet.
+MCP-1 security contract, MCP-2 canonical GitHub URL validation, and MCP-3 safe public-repository ingestion are implemented. MCP detection and security rules have not started yet.
 
 ## Architecture and security contract
 
@@ -27,3 +27,9 @@ See [MCP-1 Foundation & Security Contract](docs/architecture/mcp-1-foundation-se
 ```
 
 It returns the parsed owner/repository for a canonical URL or a safe `400 INVALID_REPOSITORY_URL` response for unsupported input. The endpoint does not make a GitHub request, so a syntactically accepted URL is not evidence that its repository exists or is public; that check belongs to the next ingestion ticket.
+
+## Safe ingestion boundary
+
+The ingestion service uses a fixed `https://api.github.com/` REST base address with redirects disabled. It reads metadata, a recursive tree, and selected Base64 file content only; it never clones, checks out, builds, installs, or runs repository code.
+
+The initial limits are 1,000 tree entries, 200 candidate files, 512 KiB per file, 5 MiB total source bytes, and a 20-second deadline. Binary files and symbolic links are skipped; limit and timeout failures return controlled error contracts without logging raw repository content.
