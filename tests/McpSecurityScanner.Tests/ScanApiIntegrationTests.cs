@@ -15,6 +15,20 @@ namespace McpSecurityScanner.Tests;
 public sealed class ScanApiIntegrationTests
 {
     [Fact]
+    public async Task Root_ServesMinimalScanUi()
+    {
+        using var factory = new ScanApiFactory(FakeGitHubRepositoryApiClient.WithFiles(new Dictionary<string, string>()));
+        using var client = factory.CreateClient();
+
+        var response = await client.GetAsync("/");
+        var html = await response.Content.ReadAsStringAsync();
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains("Scan a repository", html, StringComparison.Ordinal);
+        Assert.Contains("/app.js", html, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task Scan_ReturnsMcpEvidenceSeverityCountsFindingsAndNoRawSecret()
     {
         var gitHubClient = FakeGitHubRepositoryApiClient.WithFiles(new Dictionary<string, string>

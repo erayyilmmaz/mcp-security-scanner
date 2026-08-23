@@ -30,6 +30,10 @@ It returns the parsed owner/repository for a canonical URL or a safe `400 INVALI
 
 `POST /api/scans` accepts the same request shape and performs the complete bounded flow: validation, public GitHub metadata/tree/content read, MCP detection, and all seven MVP rules. A successful response returns the repository, MCP classification/evidence, and a severity summary plus findings. No scan history, account, database, repository clone, or code execution is involved. Errors use the safe API error model and findings redact credential evidence.
 
+## Minimal web interface
+
+The root route serves a dependency-free scan UI. It validates canonical GitHub URLs before submitting, shows loading and safe error states, and renders MCP evidence plus each finding's location, redacted evidence, impact, remediation, confidence, and reference. It intentionally presents static evidence only—never a security score or certification claim.
+
 ## Safe ingestion boundary
 
 The ingestion service uses a fixed `https://api.github.com/` REST base address with redirects disabled. It reads metadata, a recursive tree, and selected Base64 file content only; it never clones, checks out, builds, installs, or runs repository code.

@@ -42,11 +42,8 @@ builder.Services.AddSingleton<RepositoryScanService>();
 
 var app = builder.Build();
 
-app.MapGet("/", () => Results.Ok(new
-{
-    service = "MCP Security Scanner",
-    status = "scan-api-ready"
-}));
+app.UseDefaultFiles();
+app.UseStaticFiles();
 
 app.MapPost("/api/repositories/validate", (
     RepositoryUrlValidationRequest request,
