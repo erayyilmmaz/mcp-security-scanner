@@ -6,7 +6,7 @@ The scanner reads and analyzes repository content; it **never executes analyzed 
 
 ## Project status
 
-MCP-1 security contract, MCP-2 canonical GitHub URL validation, MCP-3 safe public-repository ingestion, MCP-4 deterministic MCP detection, MCP-5 rule-engine/finding contracts, and MCP-6 local-execution/filesystem rules are implemented.
+MCP-1 security contract, MCP-2 canonical GitHub URL validation, MCP-3 safe public-repository ingestion, MCP-4 deterministic MCP detection, MCP-5 rule-engine/finding contracts, MCP-6 local-execution/filesystem rules, and MCP-7 transport/credential/authorization rules are implemented.
 
 ## Architecture and security contract
 
@@ -45,3 +45,7 @@ The rule engine runs independently implemented deterministic rules against the b
 ## Local-execution and filesystem rules
 
 MCP-6 implements `MCP-CMD-001` for `sudo`, `MCP-CMD-002` for explicit `rm -rf`/`curl|sh`/`wget|sh` forms, and `MCP-FS-001` for SSH, cloud-credential, system, and container-control paths. They scan supported configuration and executable source formats only; README prose is not treated as a high-severity finding. See [MCP-6 rule contract](docs/architecture/mcp-6-local-execution-filesystem-rules.md).
+
+## Transport, credential, and authorization rules
+
+MCP-7 implements `MCP-NET-001` for non-loopback `http://` endpoints, `MCP-SEC-001` for literal hardcoded credentials, `MCP-AUTH-001` for explicit broad/wildcard OAuth scopes, and `MCP-AUTH-002` for `javascript:`, `file:`, and `data:` authorization URL schemes. Localhost, loopback, and `0.0.0.0` development endpoints are excluded. See [MCP-7 rule contract](docs/architecture/mcp-7-transport-credential-authorization-rules.md).

@@ -41,6 +41,7 @@ public sealed class SecurityRuleEngineTests
     [InlineData("API_KEY=super-secret-value", "API_KEY=[REDACTED]")]
     [InlineData("Authorization: Bearer super-secret-token", "Authorization: Bearer [REDACTED]")]
     [InlineData("token: 'another-secret'", "token: [REDACTED]")]
+    [InlineData("\"apiKey\": \"actual-secret\"", "\"apiKey\": [REDACTED]")]
     public void Analyze_RedactsSecretEvidence(string rawEvidence, string expectedEvidence)
     {
         var rule = new StaticRule(

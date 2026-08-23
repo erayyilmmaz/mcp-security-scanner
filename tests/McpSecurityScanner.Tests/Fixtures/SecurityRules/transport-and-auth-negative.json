@@ -1,0 +1,10 @@
+{
+  "localEndpoint": "http://localhost:3000/mcp",
+  "loopbackV4": "http://127.0.0.1:3000/mcp",
+  "loopbackV6": "http://[::1]:3000/mcp",
+  "developmentBind": "http://0.0.0.0:3000/mcp",
+  "apiKey": "${API_KEY}",
+  "clientSecret": "replace-me",
+  "scope": ["files:read", "profile"],
+  "authorizationUrl": "https://auth.example.com/authorize"
+}

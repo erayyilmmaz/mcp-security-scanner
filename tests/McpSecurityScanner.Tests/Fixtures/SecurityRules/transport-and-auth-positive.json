@@ -1,0 +1,7 @@
+{
+  "remoteEndpoint": "http://api.example.com/mcp",
+  "apiKey": "actual-super-secret-value",
+  "scope": ["files:read", "write:*"],
+  "authorizationUrl": "javascript:alert(1)",
+  "fallback_auth_uri": "data:text/html,untrusted"
+}

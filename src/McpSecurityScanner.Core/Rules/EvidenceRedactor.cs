@@ -19,7 +19,7 @@ public sealed partial class EvidenceRedactor
     }
 
     [GeneratedRegex(
-        """(?<label>\b(?:api[_-]?key|token|secret|password|client[_-]?secret)\b\s*[:=]\s*)(?<value>"[^"]*"|'[^']*'|[^\s,;]+)""",
+        """(?<label>["']?(?:api[_-]?key|token|secret|password|client[_-]?secret)["']?\s*[:=]\s*)(?<value>"[^"]*"|'[^']*'|[^\s,;]+)""",
         RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]
     private static partial Regex LabeledSecret();
 
