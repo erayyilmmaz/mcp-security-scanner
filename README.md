@@ -26,4 +26,4 @@ See [MCP-1 Foundation & Security Contract](docs/architecture/mcp-1-foundation-se
 { "repositoryUrl": "https://github.com/owner/repository" }
 ```
 
-It returns the parsed owner/repository for a canonical URL or a safe `400 INVALID_REPOSITORY_URL` response for unsupported input. The endpoint does not make a GitHub request; repository access belongs to the next ingestion ticket.
+It returns the parsed owner/repository for a canonical URL or a safe `400 INVALID_REPOSITORY_URL` response for unsupported input. The endpoint does not make a GitHub request, so a syntactically accepted URL is not evidence that its repository exists or is public; that check belongs to the next ingestion ticket.

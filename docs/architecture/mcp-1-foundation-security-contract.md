@@ -73,6 +73,8 @@ The URL must use HTTPS, host `github.com`, and contain exactly an owner and repo
 
 The submitted URL is an identifier only. It must be parsed into owner/repository values; downstream access uses an allowlisted GitHub API base URL.
 
+MCP-2 performs only syntactic URL validation. Repository existence and public accessibility are verified later by the read-only GitHub ingestion flow; a syntactically valid URL must not be represented as an accessible repository before that check.
+
 ## 5. Initial resource policy
 
 The limits below are product controls, not claims about the GitHub repository’s total size. Hitting a limit produces a partial/failed scan response; it must not cause the service to fetch or process more data.
