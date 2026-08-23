@@ -1,7 +1,19 @@
 using McpSecurityScanner.Core.Repositories;
+using McpSecurityScanner.Infrastructure.GitHub;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSingleton<GitHubRepositoryUrlValidator>();
+builder.Services.AddSingleton(RepositoryIngestionOptions.Default);
+builder.Services.AddHttpClient<IGitHubRepositoryApiClient, GitHubRestApiClient>(client =>
+{
+    client.BaseAddress = new Uri("https://api.github.com/");
+    client.Timeout = Timeout.InfiniteTimeSpan;
+})
+.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+{
+    AllowAutoRedirect = false
+});
+builder.Services.AddSingleton<RepositoryIngestionService>();
 
 var app = builder.Build();
 

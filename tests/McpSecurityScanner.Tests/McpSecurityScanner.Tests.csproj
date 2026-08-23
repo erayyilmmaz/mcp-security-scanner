@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\McpSecurityScanner.Core\McpSecurityScanner.Core.csproj" />
+    <ProjectReference Include="..\..\src\McpSecurityScanner.Infrastructure\McpSecurityScanner.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
