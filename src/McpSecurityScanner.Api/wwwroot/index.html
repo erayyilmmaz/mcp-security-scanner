@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Deterministic, evidence-based static analysis for public MCP repositories." />
+    <title>MCP Security Scanner</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="hero">
+        <p class="eyebrow">MCP Security Scanner</p>
+        <h1>Understand a public MCP repository before you connect it.</h1>
+        <p class="lede">Static, deterministic evidence for public GitHub repositories. The scanner never runs repository code.</p>
+      </header>
+
+      <section class="scan-panel" aria-labelledby="scan-heading">
+        <div>
+          <h2 id="scan-heading">Scan a repository</h2>
+          <p class="muted">Enter a canonical public GitHub URL: <code>https://github.com/owner/repository</code></p>
+        </div>
+        <form id="scan-form" novalidate>
+          <label for="repository-url">GitHub repository URL</label>
+          <div class="form-row">
+            <input id="repository-url" name="repository-url" type="url" inputmode="url" autocomplete="url" placeholder="https://github.com/owner/repository" required aria-describedby="url-help scan-error" />
+            <button id="scan-button" type="submit">Scan repository</button>
+          </div>
+          <p id="url-help" class="hint">Only public GitHub repository URLs are accepted.</p>
+        </form>
+        <p id="scan-loading" class="loading" role="status" hidden>Reading bounded public repository content and applying static rules…</p>
+        <div id="scan-error" class="notice error" role="alert" hidden></div>
+      </section>
+
+      <section id="results" class="results" aria-live="polite" hidden>
+        <header class="results-heading">
+          <div>
+            <p class="eyebrow">Scan result</p>
+            <h2 id="result-repository"></h2>
+          </div>
+          <p id="result-classification" class="classification"></p>
+        </header>
+
+        <div>
+          <h3>Finding summary</h3>
+          <div id="severity-summary" class="severity-grid" aria-label="Finding counts by severity"></div>
+        </div>
+
+        <section class="result-section" aria-labelledby="mcp-evidence-heading">
+          <h3 id="mcp-evidence-heading">MCP detection evidence</h3>
+          <p id="mcp-evidence-empty" class="muted" hidden>No MCP detection evidence was returned for this repository.</p>
+          <div id="mcp-evidence" class="evidence-list"></div>
+        </section>
+
+        <section class="result-section" aria-labelledby="findings-heading">
+          <h3 id="findings-heading">Findings</h3>
+          <p id="findings-empty" class="muted" hidden>No findings were produced by the implemented deterministic rules.</p>
+          <div id="findings" class="finding-list"></div>
+        </section>
+
+        <p class="disclaimer">Findings are static evidence, not a security score, certification, or guarantee of runtime behavior.</p>
+      </section>
+    </main>
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>

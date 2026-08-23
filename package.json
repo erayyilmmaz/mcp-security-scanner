@@ -1,0 +1,7 @@
+{
+  "name": "mcp-security-scanner-ui-tests",
+  "private": true,
+  "scripts": {
+    "test:ui": "node --test tests/ui/*.test.mjs"
+  }
+}
