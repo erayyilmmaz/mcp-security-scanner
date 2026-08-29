@@ -79,6 +79,12 @@ Positive MCP classification requires deterministic evidence from at least one im
 
 Credential-like evidence is masked as `[REDACTED]`. Loopback, `localhost`, `*.localhost`, and `0.0.0.0` development bind addresses are not reported by `MCP-NET-001`. Rule findings are static indicators, not exploitability claims.
 
+## MCP reference baseline and rule limits
+
+The implemented MCP-specific rules cite official **MCP 2026-07-28** [Security Best Practices](https://modelcontextprotocol.io/docs/2026-07-28/tutorials/security/security_best_practices) and [Authorization Specification](https://modelcontextprotocol.io/specification/2026-07-28/basic/authorization) guidance. This is a reference baseline for the rule catalogue, not a claim that MSS implements the MCP protocol, validates MCP conformance, or covers every vulnerability type in that specification.
+
+Rules are deliberately bounded static pattern checks. They can produce false positives, and they can miss risky behavior (false negatives); a finding needs human review, while no finding is not proof that a repository is safe. See the [MCP specification reference policy](docs/architecture/mcp-specification-reference-policy.md).
+
 ## Example scan
 
 ```bash
@@ -162,3 +168,4 @@ Then open `http://127.0.0.1:8080`. The runtime image exposes port 8080 and runs 
 - [MCP-5 rule-engine contract](docs/architecture/mcp-5-rule-engine-contract.md)
 - [MCP-8 scan API contract](docs/architecture/mcp-8-scan-api-contract.md)
 - [MCP-9 web UI contract](docs/architecture/mcp-9-minimal-web-ui-contract.md)
+- [MCP specification reference policy](docs/architecture/mcp-specification-reference-policy.md)
