@@ -16,6 +16,13 @@ public sealed class GitHubRestApiClient : IGitHubRepositoryApiClient
 
     private readonly HttpClient _httpClient;
 
+    public static Uri GitHubApiBaseAddress { get; } = new("https://api.github.com/");
+
+    public static HttpClientHandler CreateSecureMessageHandler() => new()
+    {
+        AllowAutoRedirect = false
+    };
+
     public GitHubRestApiClient(HttpClient httpClient)
     {
         if (httpClient.BaseAddress is null ||

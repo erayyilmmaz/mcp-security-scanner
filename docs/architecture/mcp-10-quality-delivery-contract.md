@@ -9,6 +9,7 @@
 |---|---|---|
 | .NET tests | `dotnet test McpSecurityScanner.slnx --configuration Release --no-restore` | All tests pass. |
 | UI flow | `npm run test:ui` | All Node built-in UI-flow tests pass. |
+| No-execution boundary | `node scripts/check-no-execution-boundary.mjs src` then `npm run test:boundary` | Application source has no prohibited execution primitive; guard self-tests pass. |
 | Coverage | `dotnet test … --collect:'XPlat Code Coverage' --results-directory TestResults` then `npm run check:coverage` | Total line coverage >= 75%. |
 | Release build | `dotnet build McpSecurityScanner.slnx --configuration Release --no-restore` | Zero warnings and errors. |
 | Container | `docker build --tag mcp-security-scanner:local .` then local run/health check | Root UI and invalid-URL safe response are reachable. |
@@ -17,7 +18,7 @@ The first measured coverage baseline is 78.23% total lines (1,977 covered of 2,5
 
 ## CI contract
 
-`.github/workflows/ci.yml` runs on push, pull request, and manual dispatch with read-only repository permission. It restores .NET dependencies, runs coverage-collected .NET tests, enforces the coverage gate, runs native Node UI tests, performs a release build, and builds the Docker image. It does not deploy, scan external repositories, or use secrets.
+`.github/workflows/ci.yml` runs on push, pull request, and manual dispatch with read-only repository permission. Before restoring dependencies it scans only the scanner's own `src/` files for prohibited repository-execution primitives and runs the guard's self-tests. It then restores .NET dependencies, runs coverage-collected .NET tests, enforces the coverage gate, runs native Node UI tests, performs a release build, and builds the Docker image. It does not deploy, scan external repositories, or use secrets.
 
 ## Container contract
 

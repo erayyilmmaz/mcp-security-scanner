@@ -11,6 +11,16 @@ public sealed class GitHubRestApiClientTests
     private static readonly GitHubRepositoryReference Repository = new("openai", "example-mcp");
 
     [Fact]
+    public void SecureHttpContract_UsesFixedGitHubApiBaseAddressAndDisablesRedirects()
+    {
+        Assert.Equal(new Uri("https://api.github.com/"), GitHubRestApiClient.GitHubApiBaseAddress);
+
+        using var handler = GitHubRestApiClient.CreateSecureMessageHandler();
+
+        Assert.False(handler.AllowAutoRedirect);
+    }
+
+    [Fact]
     public async Task GetMetadataAsync_UsesFixedRepositoryRoute_AndReadsDefaultBranch()
     {
         HttpRequestMessage? capturedRequest = null;
@@ -94,7 +104,7 @@ public sealed class GitHubRestApiClientTests
     private static HttpClient CreateHttpClient(Func<HttpRequestMessage, HttpResponseMessage> responder) =>
         new(new StubHttpMessageHandler(responder))
         {
-            BaseAddress = new Uri("https://api.github.com/")
+            BaseAddress = GitHubRestApiClient.GitHubApiBaseAddress
         };
 
     private static HttpResponseMessage JsonResponse(string json) =>
