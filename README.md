@@ -136,6 +136,10 @@ dotnet test McpSecurityScanner.slnx --configuration Release --no-restore
 # Browser-state UI flow tests (no third-party frontend packages)
 npm run test:ui
 
+# No-execution boundary guard and its self-tests (application source only)
+node scripts/check-no-execution-boundary.mjs src
+npm run test:boundary
+
 # Cobertura coverage report and MCP-10 line-coverage gate
 dotnet test McpSecurityScanner.slnx --configuration Release --no-restore --collect:'XPlat Code Coverage' --results-directory TestResults
 npm run check:coverage
@@ -145,6 +149,8 @@ dotnet build McpSecurityScanner.slnx --configuration Release --no-restore
 ```
 
 The initial MVP quality gate is **at least 75% total line coverage**. The measured baseline when this gate was introduced was 78.23%. GitHub Actions runs restore, .NET tests with coverage, the coverage gate, UI tests, release build, and a Docker image build on pushes and pull requests.
+
+The no-execution guard reads only MSS application source under `src/`. It rejects process-launch APIs, Git libraries, and explicit clone/install/build/run command patterns; it does not inspect, download, or execute a submitted repository. The CI/Docker image build packages MSS itself and is deliberately outside this guard's source scope.
 
 ## Run with Docker
 
@@ -169,3 +175,4 @@ Then open `http://127.0.0.1:8080`. The runtime image exposes port 8080 and runs 
 - [MCP-8 scan API contract](docs/architecture/mcp-8-scan-api-contract.md)
 - [MCP-9 web UI contract](docs/architecture/mcp-9-minimal-web-ui-contract.md)
 - [MCP specification reference policy](docs/architecture/mcp-specification-reference-policy.md)
+- [No-execution CI guard contract](docs/architecture/mss-12-no-execution-ci-guard.md)

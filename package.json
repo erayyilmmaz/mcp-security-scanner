@@ -3,6 +3,7 @@
   "private": true,
   "scripts": {
     "test:ui": "node --test tests/ui/*.test.mjs",
+    "test:boundary": "node --test tests/guards/*.test.mjs",
     "check:coverage": "node scripts/check-coverage.mjs TestResults 0.75"
   }
 }

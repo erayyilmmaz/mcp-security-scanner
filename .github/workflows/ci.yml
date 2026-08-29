@@ -28,6 +28,12 @@ jobs:
         with:
           node-version: 24.x
 
+      - name: Enforce scanner no-execution boundary
+        run: node scripts/check-no-execution-boundary.mjs src
+
+      - name: Test no-execution boundary guard
+        run: npm run test:boundary
+
       - name: Restore .NET dependencies
         run: dotnet restore McpSecurityScanner.slnx
 

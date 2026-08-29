@@ -18,13 +18,10 @@ builder.Services.AddSingleton<GitHubRepositoryUrlValidator>();
 builder.Services.AddSingleton(RepositoryIngestionOptions.Default);
 builder.Services.AddHttpClient<IGitHubRepositoryApiClient, GitHubRestApiClient>(client =>
 {
-    client.BaseAddress = new Uri("https://api.github.com/");
+    client.BaseAddress = GitHubRestApiClient.GitHubApiBaseAddress;
     client.Timeout = Timeout.InfiniteTimeSpan;
 })
-.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
-{
-    AllowAutoRedirect = false
-});
+.ConfigurePrimaryHttpMessageHandler(GitHubRestApiClient.CreateSecureMessageHandler);
 builder.Services.AddSingleton<RepositoryIngestionService>();
 builder.Services.AddSingleton<McpRepositoryDetector>();
 builder.Services.AddSingleton(new SecurityRuleEngine(
