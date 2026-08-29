@@ -18,6 +18,6 @@ MCP-7 adds four independent static rules to the MCP-5 engine. They consume only 
 
 Each match supplies file and one-based line/column evidence, explanation, remediation, high confidence, and an official MCP reference. The engine redacts literal credential values before findings are returned; the tests confirm that the raw API-key fixture value never appears in report evidence.
 
-`MCP-NET-001` and `MCP-SEC-001` cite [MCP Security Best Practices](https://modelcontextprotocol.io/docs/2025-11-25/tutorials/security/security_best_practices). The authorization rules cite the [MCP Authorization Specification](https://modelcontextprotocol.io/specification/2025-11-25/basic/authorization), which requires HTTPS for authorization-server endpoints and least-privilege scope selection.
+`MCP-NET-001` and `MCP-SEC-001` cite [MCP Security Best Practices (2026-07-28)](https://modelcontextprotocol.io/docs/2026-07-28/tutorials/security/security_best_practices). The authorization rules cite the [MCP Authorization Specification (2026-07-28)](https://modelcontextprotocol.io/specification/2026-07-28/basic/authorization), which covers authorization-server endpoint HTTPS requirements and least-privilege scope selection. See the [MCP specification reference policy](mcp-specification-reference-policy.md) for version ownership.
 
 These rules identify explicit static configuration/source patterns. They do not assert runtime exploitability, credential validity, or an overall security certification.

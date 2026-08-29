@@ -5,6 +5,9 @@ namespace McpSecurityScanner.Tests;
 
 public sealed class LocalExecutionAndFilesystemRuleTests
 {
+    private const string SecurityBestPracticesReference =
+        "https://modelcontextprotocol.io/docs/2026-07-28/tutorials/security/security_best_practices";
+
     private static readonly GitHubRepositoryReference Repository = new("openai", "example-mcp");
     private readonly SecurityRuleEngine _engine = new(
         [new PrivilegedExecutionRule(), new DangerousCommandRule(), new SensitiveFilesystemRule()],
@@ -29,13 +32,13 @@ public sealed class LocalExecutionAndFilesystemRuleTests
         Assert.Equal(2, privilegedFinding.Line);
         Assert.Equal("sudo node server.js --api-key=[REDACTED]", privilegedFinding.Evidence);
         Assert.Equal(FindingConfidence.High, privilegedFinding.Confidence);
-        Assert.Equal("MCP Security Best Practices", privilegedFinding.Reference.Title);
+        Assert.Equal("MCP Security Best Practices (2026-07-28)", privilegedFinding.Reference.Title);
 
         Assert.All(report.Findings, finding =>
         {
             Assert.NotNull(finding.Line);
             Assert.NotEmpty(finding.Remediation);
-            Assert.StartsWith("https://modelcontextprotocol.io/", finding.Reference.Url, StringComparison.Ordinal);
+            Assert.Equal(SecurityBestPracticesReference, finding.Reference.Url);
         });
     }
 

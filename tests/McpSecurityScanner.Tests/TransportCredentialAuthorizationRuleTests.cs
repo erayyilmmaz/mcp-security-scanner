@@ -5,6 +5,11 @@ namespace McpSecurityScanner.Tests;
 
 public sealed class TransportCredentialAuthorizationRuleTests
 {
+    private const string SecurityBestPracticesReference =
+        "https://modelcontextprotocol.io/docs/2026-07-28/tutorials/security/security_best_practices";
+    private const string AuthorizationSpecificationReference =
+        "https://modelcontextprotocol.io/specification/2026-07-28/basic/authorization";
+
     private static readonly GitHubRepositoryReference Repository = new("openai", "example-mcp");
     private readonly SecurityRuleEngine _engine = new(
         [
@@ -35,14 +40,17 @@ public sealed class TransportCredentialAuthorizationRuleTests
 
         var transportFinding = Assert.Single(report.Findings, finding => finding.RuleId == "MCP-NET-001");
         Assert.Equal("http://api.example.com", transportFinding.Evidence);
-        Assert.Equal("MCP Security Best Practices", transportFinding.Reference.Title);
+        Assert.Equal("MCP Security Best Practices (2026-07-28)", transportFinding.Reference.Title);
 
         Assert.All(report.Findings, finding =>
         {
             Assert.NotEmpty(finding.Description);
             Assert.NotEmpty(finding.Remediation);
             Assert.Equal(FindingConfidence.High, finding.Confidence);
-            Assert.StartsWith("https://modelcontextprotocol.io/", finding.Reference.Url, StringComparison.Ordinal);
+            var expectedReference = finding.RuleId is "MCP-NET-001" or "MCP-SEC-001"
+                ? SecurityBestPracticesReference
+                : AuthorizationSpecificationReference;
+            Assert.Equal(expectedReference, finding.Reference.Url);
         });
     }
 
